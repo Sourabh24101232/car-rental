@@ -1,14 +1,15 @@
 import React, { useState } from 'react'
 import { assets, menuLinks } from '../assets/assets'
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 
-const Navbar = () => {
+const Navbar = ({ setShowLogin }) => {
 
     const location = useLocation()
     const [open, setOpen] = useState(false)
+    const navigate = useNavigate()
 
     return (
-        <div className={`flex items-center justify-between px-6 md:px-16 lg:px-24 xl:px-32 py-4 text-gray-700 border-b border-borderColor relative transition-all ${location.pathname === "/" ? "bg-light" : ""}`}>
+        <div className={`flex items-center justify-between px-6 md:px-16 lg:px-24 xl:px-32 py-4 text-gray-700 border-b border-borderColor transition-all ${location.pathname === "/" ? "bg-light" : ""}`}>
 
             {/* LOGO */}
             <Link to='/'>
@@ -16,19 +17,25 @@ const Navbar = () => {
             </Link>
 
             {/* MENU LINKS CONTAINER */}
-            <div className={`w-full flex justify-end max-sm:fixed max-sm:h-screen max-sm:w-full max-sm:top-16 max-sm:border-t border-borderColor right-0 flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-8 max-sm:p-4 transition-all duration-300 z-50 ${location.pathname === "/" ? "bg-light" : "bg-white"} ${open ? "max-sm:translate-x-0" : "max-sm:translate-x-full"}`}>
+            <div className={`w-full flex sm:justify-end max-sm:justify-start max-sm:fixed max-sm:h-screen max-sm:w-full max-sm:max-w-[280px] max-sm:top-0 max-sm:right-0 max-sm:border-t border-borderColor flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-8 max-sm:p-4 max-sm:pt-16 transition-all duration-300 z-50 ${location.pathname === "/" ? "bg-light" : "bg-white"} ${open ? "max-sm:translate-x-0" : "max-sm:translate-x-full"}`}>
 
                 {menuLinks.map((link, index) =>
-                    <Link
-                        key={index}
-                        to={link.path}
-                        className="text-gray-600 hover:text-black transition"
-                    >
-                        {link.name}
-                    </Link>
+                    <Link key={index} to={link.path} className="text-gray-600 hover:text-black transition"> {link.name}</Link>
                 )}
 
+                <div className="hidden lg:flex items-center text-sm gap-2 border border-borderColor px-3 rounded-full max-w-56">
+                    <input type="text" className="py-1.5 w-full bg-transparent outline-none placeholder-gray-500" placeholder="Search products" />
+                    <img src={assets.search_icon} alt="search" />
+                </div>
+
+                <div className="flex max-sm:flex-col items-start sm:items-center gap-6">
+                    <button onClick={() => navigate('/owner')} className="cursor-pointer">Dashboard</button>
+                    <button onClick={() => setShowLogin(true)} className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition"> Login </button>
+                </div>
+
             </div>
+
+            <button onClick={(e) => { e.stopPropagation(); setOpen(!open); }} className="sm:hidden cursor-pointer relative z-[200]" aria-label="menu"  ><img src={open ? assets.close_icon : assets.menu_icon} alt="menu" /> </button>
 
         </div>
     )
