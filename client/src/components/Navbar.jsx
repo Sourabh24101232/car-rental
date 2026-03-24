@@ -1,12 +1,31 @@
 import React, { useState } from 'react'
 import { assets, menuLinks } from '../assets/assets'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { useAppContext } from '../context/AppContext'
+import toast from 'react-hot-toast'
 
-const Navbar = ({ setShowLogin }) => {
+const Navbar = () => {
+
+    const { setShowLogin, user, logout, isOwner, axios, setIsOwner } = useAppContext()
 
     const location = useLocation()
     const [open, setOpen] = useState(false)
     const navigate = useNavigate()
+
+    const changeRole = async () => {
+        try {
+            const { data } = await axios.post('/api/owner/change-role');
+            if (data.success) {
+                setIsOwner(true);
+                toast.success(data.message);
+            } else {
+                toast.error(data.message);
+            }
+
+        } catch (error) {
+            toast.error(error.message);
+        }
+    };
 
     return (
         <div className={`flex items-center justify-between px-6 md:px-16 lg:px-24 xl:px-32 py-4 text-gray-700 border-b border-borderColor transition-all ${location.pathname === "/" ? "bg-light" : ""}`}>
@@ -29,8 +48,20 @@ const Navbar = ({ setShowLogin }) => {
                 </div>
 
                 <div className="flex max-sm:flex-col items-start sm:items-center gap-6">
-                    <button onClick={() => navigate('/owner')} className="cursor-pointer">Dashboard</button>
-                    <button onClick={() => setShowLogin(true)} className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition"> Login </button>
+                    {/* <button onClick={() => isOwner ? navigate('/owner') : changeRole()} className="cursor-pointer">{isOwner ? 'Dashboard' : 'List Cars'}</button> */}
+                    <button onClick={() => {
+                        if (!user) { toast.error("Unauthorized. Please login first"); return; }
+                        if (isOwner) {
+                            navigate('/owner');
+                        } else {
+                            changeRole();
+                        }
+                    }}
+                    >
+                        {isOwner ? 'Dashboard' : 'List Cars'}
+                    </button>
+
+                    <button onClick={() => { user ? logout() : setShowLogin(true) }} className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition"> {user ? 'Logout' : 'Login'} </button>
                 </div>
 
             </div>

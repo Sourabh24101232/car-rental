@@ -1,4 +1,5 @@
 import Booking from "../models/Bookings.js";
+import Car from "../models/Car.js";
 
 // Function to Check Availability of Car for a given Date
 const checkAvailability = async (car, pickupDate, returnDate) => {
@@ -12,7 +13,6 @@ const checkAvailability = async (car, pickupDate, returnDate) => {
 };
 
 export default checkAvailability;
-
 
 // API to Check Availability of Cars for the given Date and location
 export const checkAvailabilityOfCar = async (req, res) => {
@@ -92,6 +92,7 @@ export const getUserBookings = async (req, res) => {
             .populate("car")
             .sort({ createdAt: -1 });
 
+        // console.log(bookings)
         res.json({ success: true, bookings });
     } catch (error) {
         console.log(error.message);

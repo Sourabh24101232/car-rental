@@ -1,19 +1,81 @@
 import React, { useEffect, useState } from 'react'
-import { dummyCarData } from '../../assets/assets'
+// import { dummyCarData } from '../../assets/assets'
 import Title from '../../components/owner/Title'
 import { assets } from '../../assets/assets'
+import { useAppContext } from '../../context/AppContext';
+import toast from 'react-hot-toast';
 
 const ManageCars = () => {
 
-  const currency = import.meta.env.VITE_CURRENCY
+  const { axios, currency, isOwner } = useAppContext()
+
+  // const currency = import.meta.env.VITE_CURRENCY
   const [cars, setCars] = useState([])
-  const fetchCarOwners = async () => {
-    setCars(dummyCarData)
-  }
+
+  // const fetchOwnerCars = async () => {
+  //   setCars(dummyCarData)
+  // }
+
+  const fetchOwnerCars = async () => {
+    try {
+      const { data } = await axios.get('/api/owner/cars');
+
+      if (data.success) {
+        setCars(data.cars);
+      } else {
+        toast.error(data.message);
+      }
+
+    } catch (error) {
+      toast.error(error.response?.data?.message || error.message);
+    }
+  };
+
+  //Toggle Availability
+  const toggleAvailability = async (carId) => {
+    try {
+      const { data } = await axios.post('/api/owner/toggle-car', { carId });
+
+      if (data.success) {
+        toast.success(data.message);
+        fetchOwnerCars();
+      } else {
+        toast.error(data.message);
+      }
+
+    } catch (error) {
+      toast.error(error.response?.data?.message || error.message);
+    }
+  };
+
+  //Delete a car
+  const deleteCar = async (carId) => {
+    try {
+      const confirmDelete = window.confirm("Are you sure you want to delete this car?");
+
+      if (!confirmDelete) return;
+
+      const { data } = await axios.post('/api/owner/delete-car', { carId });
+
+      if (data.success) {
+        toast.success(data.message);
+        fetchOwnerCars();
+      } else {
+        toast.error(data.message);
+      }
+
+    } catch (error) {
+      toast.error(error.response?.data?.message || error.message);
+    }
+  };
+
+  // useEffect(() => {
+  //   fetchOwnerCars()
+  // }, [])
 
   useEffect(() => {
-    fetchCarOwners()
-  }, [])
+    isOwner && fetchOwnerCars()
+  }, [isOwner])
 
   return (
     <div className='px-4 pt-10 md:px-10 w-full'>
@@ -49,7 +111,7 @@ const ManageCars = () => {
                       <p className='font-medium'> {car.brand} {car.model}</p>
                       <p className='text-xs text-gray-500'>{car.seating_capacity} • {car.transmission}</p>
                     </div>
-                    
+
                   </div>
                 </td>
 
@@ -62,8 +124,11 @@ const ManageCars = () => {
 
                 <td className='p-3'>
                   <div className='flex items-center'>
-                    <img src={car.isAvailable ? assets.eye_close_icon : assets.eye_icon} alt="" className='cursor-pointer' />
-                    <img src={assets.delete_icon} alt="" className='cursor-pointer' />
+                    {/* <img src={car.isAvailable ? assets.eye_close_icon : assets.eye_icon} alt="" className='cursor-pointer' />
+                    <img src={assets.delete_icon} alt="" className='cursor-pointer' /> */}
+
+                    <img onClick={() => toggleAvailability(car._id)} src={car.isAvailable ? assets.eye_close_icon : assets.eye_icon} alt="" className='cursor-pointer' />
+                    <img onClick={() => deleteCar(car._id)} src={assets.delete_icon} alt="" className='cursor-pointer' />
                   </div>
                 </td>
 
